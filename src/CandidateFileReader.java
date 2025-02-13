@@ -83,7 +83,7 @@ public class CandidateFileReader implements CSVFileReader {
                 };
 
                 values.add(selectedValues);
-                // System.out.println("Values: " + Arrays.toString(selectedValues));
+                //System.out.println("Values: " + Arrays.toString(selectedValues));
 
             }
 
@@ -92,6 +92,7 @@ public class CandidateFileReader implements CSVFileReader {
             e.printStackTrace();
         }
 
+        // HashSet<Candidate> candidates = Candidate.CreateCandidates(values);
         return values;
     }
 
