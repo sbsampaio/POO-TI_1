@@ -1,2 +1,8 @@
 csv/votacao_secao_2024_ES.csv
 csv/consulta_cand_2024_ES.csv
+
+lib/
+
+csv/
+
+*.csv
