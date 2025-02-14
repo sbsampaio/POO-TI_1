@@ -25,64 +25,41 @@ public class Candidate {
     private Gender gender; // genero (2 - masculino, 4 - feminino)
     private int candidateVotes; // votos
 
-    // essa função aqui pode ser private?
-    public Candidate(int cityCode, int jobCode, int candidateNumber, String candidateName, 
-                    int partyNumber, String partyAcronym, int federationNumber, 
-                    String birthDate, CandidateSituation candidateSituation, Gender gender)
-    {
-        this.cityCode = cityCode;
-        this.jobCode = jobCode;
-        this.candidateNumber = candidateNumber;
-        this.candidateName = candidateName;
-        this.partyNumber = partyNumber;
-        this.partyAcronym = partyAcronym;
-        this.federationNumber = federationNumber;
-        this.birthDate = birthDate;
-        this.candidateSituation = candidateSituation;
-        this.gender = gender;
-        this.candidateVotes = 0;
-    }
-
-    public static Candidate CreateCandidate(String[] values) {
-
-        int cityCode = Integer.parseInt(values[0].replaceAll("\"", ""));
-        int jobCode = Integer.parseInt(values[1].replaceAll("\"", ""));
-        int candidateNumber = Integer.parseInt(values[2].replaceAll("\"", ""));
-        String candidateName = values[3];
-        int partyNumber = Integer.parseInt(values[4].replaceAll("\"", ""));
-        String partyAcronym = values[5];
-        int federationNumber = Integer.parseInt(values[6].replaceAll("\"", ""));
-        String birthDate = values[7];
-        CandidateSituation candidateSituation = null;
-        if (values[8].equals("1")) {
-            candidateSituation = CandidateSituation.ELECTED;
-        } else if (values[8].equals("4")) {
-            candidateSituation = CandidateSituation.NOT_ELECTED;
-        } else if (values[8].equals("-1")) {
-            candidateSituation = CandidateSituation.INVALID;
+    
+    public Candidate(String[] values) {
+        this.cityCode = Integer.parseInt(values[0]);
+        this.jobCode = Integer.parseInt(values[1]);
+        this.candidateNumber = Integer.parseInt(values[2]);
+        this.candidateName = values[3];
+        this.partyNumber = Integer.parseInt(values[4]);
+        this.partyAcronym = values[5];
+        this.federationNumber = Integer.parseInt(values[6]);
+        this.birthDate = values[7];
+        if (values[8].equals("2") || values[8].equals("3")) {
+            this.candidateSituation = CandidateSituation.ELECTED;
+        } 
+        else if (values[8].equals("-1")) {
+            this.candidateSituation = CandidateSituation.INVALID;
+        } else {
+            this.candidateSituation = CandidateSituation.NOT_ELECTED;
         }
-        Gender gender = null;
+
         if (values[9].equals("2")) {
-            gender = Gender.MASCULINE;
+            this.gender = Gender.MASCULINE;
         } else if (values[9].equals("4")) {
-            gender = Gender.FEMININE;
+            this.gender = Gender.FEMININE;
         }
-
-        Candidate newCandidate = new Candidate(cityCode, jobCode, candidateNumber, candidateName, partyNumber, partyAcronym, federationNumber, birthDate, candidateSituation, gender);
-
-        return newCandidate;
     }
 
     public static HashMap<Integer, Candidate> CreateCandidates(List<String[]> values) {
         HashMap<Integer, Candidate> candidates = new HashMap<Integer, Candidate>();
 
         for (String[] value : values) {
-            Candidate candidate = CreateCandidate(value);
-            System.out.println(candidate);
+            Candidate candidate = new Candidate(value);
             candidates.put(candidate.candidateNumber, candidate);
         }
 
-        return candidates;
+        return new HashMap<>(candidates);
     }
 
     // getters
@@ -125,17 +102,19 @@ public class Candidate {
     public Gender getGender() {
         return gender;
     }
+
+    public int getCandidateVotes() {
+        return candidateVotes;
+    }
     // end getters
 
-    // essa função é segura?
-    public void addCandidateVotes(HashMap<Integer, Candidate> candidates, int candidateNumber, int candidateVotes) {
-        Candidate candidate = candidates.get(candidateNumber);
-        candidate.candidateVotes += candidateVotes;
+    public void incCandidateVotes(int votes) {
+        candidateVotes += votes;
     }
 
     @Override
     public String toString() {
-        return "+----------------------------------------+\n" +
+        return "\n+----------------------------------------+\n" +
                "| Codigo do municipio: " + cityCode + "\n" +
                "| Codigo do cargo: " + jobCode + "\n" +
                "| Numero do candidato: " + candidateNumber + "\n" +
@@ -146,6 +125,12 @@ public class Candidate {
                "| Data de nascimento: " + birthDate + "\n" +
                "| Situacao do candidato: " + candidateSituation + "\n" +
                "| Genero: " + gender + "\n" +
-               "| Votos: " + candidateVotes + "\n";
+               "| Votos: " + candidateVotes + "\n" +
+               "+----------------------------------------+\n";
+
+    }
+
+    public void printCandidate() {
+        System.out.println(this.candidateName + " (" + this.partyAcronym + ", " + this.candidateVotes + " votos)");
     }
 }

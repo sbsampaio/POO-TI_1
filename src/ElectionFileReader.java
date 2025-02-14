@@ -28,13 +28,10 @@ public class ElectionFileReader implements CSVFileReader {
             e.printStackTrace();
         }
 
-        // System.out.println("Keys: " + Arrays.toString(keys));
-
+        // select the following columns: CD_CARGO, CD_MUNICIPIO, NR_VOTAVEL, QT_VOTOS
         String[] selectedKeys = {
                 keys[17], keys[13], keys[19], keys[21]
         };
-
-        System.out.println("Chaves selecionadas: " + Arrays.toString(selectedKeys));
 
         return selectedKeys;
     }
@@ -52,13 +49,18 @@ public class ElectionFileReader implements CSVFileReader {
             while (scanner.hasNextLine()) {
                 String[] row = scanner.nextLine().split(";");
 
+                // select the following columns: CD_CARGO, CD_MUNICIPIO, NR_VOTAVEL, QT_VOTOS
                 String[] selectedValues = {
                     row[17], row[13], row[19], row[21]
                 };
 
-                if (selectedValues[0].equals("13") && selectedValues[1].equals(String.valueOf(cityCode)) ) {
-                    values.add(selectedValues);
-                    System.out.println("Values: " + Arrays.toString(selectedValues));
+                // only add the councilors that are in the actual city
+                if (selectedValues[0].equals("13") && selectedValues[1].equals(String.valueOf(cityCode))) {
+                    if (selectedValues[2].length() == 5) {
+                        values.add(selectedValues);
+                        // System.out.println("CODIGO DO MUNICIPIO: " + selectedValues[1]);
+                    }
+                    // System.out.println("Values: " + Arrays.toString(selectedValues));
                 }
 
             }
@@ -85,13 +87,13 @@ public class ElectionFileReader implements CSVFileReader {
         }
     }
 
-    public void ComputeVotes(HashMap<Integer, Candidate> candidates, List<String[]> values) {
+    public void ComputeVotes(HashMap<Integer, Candidate> candidates) {
 
         for (String[] value : values) {
-            int candidateNumber = Integer.parseInt(value[0].replaceAll("\"", ""));
-            int newVotes = Integer.parseInt(value[1].replaceAll("\"", ""));
+            int candidateNumber = Integer.parseInt(value[2]);
+            int newVotes = Integer.parseInt(value[3]);
 
-            candidate.addCandidateVotes(candidates, candidateNumber, newVotes);
+            candidates.get(candidateNumber).incCandidateVotes(newVotes);
         }
     }
 

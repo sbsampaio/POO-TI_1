@@ -1,10 +1,10 @@
 all: clean compile run
 
 compile:
-	javac App.java
+	javac -d bin src/*.java
 
 run:
-	java App
+	java -cp bin App
 
 clean:
 	rm -f *.class
