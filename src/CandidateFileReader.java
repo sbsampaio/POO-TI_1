@@ -99,7 +99,7 @@ public class CandidateFileReader implements CSVFileReader {
             e.printStackTrace();
         }
 
-        System.out.println("Candidate file itens: " + values.size());
+        // System.out.println("Candidate file itens: " + values.size());
         return values;
     }
 

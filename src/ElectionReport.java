@@ -1,4 +1,5 @@
 import java.io.*;
+import java.text.NumberFormat;
 import java.util.*;
 
 // import java.util.HashMap;
@@ -17,11 +18,11 @@ public class ElectionReport {
             votingData.ComputeVotes(this.candidates);
 
             // for (Candidate candidate : this.candidates.values()) {
-            //     System.out.println(candidate);
+            // System.out.println(candidate);
             // }
             getQuantityElected();
             getElectedCandidates();
-            
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -40,11 +41,8 @@ public class ElectionReport {
     }
 
     public void getElectedCandidates() {
-        // ainda falta colocar o . nos numero (7.256 votos)
-        // e voltar com o * dos nomes q tem asterisco
         System.out.println("\nVereadores eleitos:");
 
-        
         List<Candidate> electedCandidates = new ArrayList<Candidate>();
 
         for (Candidate candidate : candidates.values()) {
@@ -53,14 +51,24 @@ public class ElectionReport {
             }
         }
 
-        Collections.sort(electedCandidates, (c1, c2) -> Integer.compare(c2.getCandidateVotes(), c1.getCandidateVotes()));
+        // order by votes (decrescent)
+        Collections.sort(electedCandidates,
+                (c1, c2) -> Integer.compare(c2.getCandidateVotes(), c1.getCandidateVotes()));
+        // em caso de empate, os mais velhos tem prioridade
 
         int counter = 0;
 
         for (Candidate candidate : electedCandidates) {
+            NumberFormat brFormat = NumberFormat.getInstance(Locale.forLanguageTag("pt-BR"));
+            
             counter++;
             System.out.print(counter + " - ");
-            System.out.println(candidate.getCandidateName() + " (" + candidate.getPartyAcronym() + ", " + candidate.getCandidateVotes() + " votos)");
-        }       
+            // if the candidate is part of a federation, print an asterisk
+            if (candidate.getFederationNumber() != -1) {
+                System.out.print("*");
+            }
+            System.out.println(candidate.getCandidateName() + " (" + candidate.getPartyAcronym() + ", "
+                    + brFormat.format(candidate.getCandidateVotes()) + " votos)");
+        }
     }
 }

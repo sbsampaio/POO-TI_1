@@ -1,5 +1,7 @@
 import java.io.*;
 import java.util.*;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 enum Gender {
     MASCULINE,
@@ -24,6 +26,7 @@ public class Candidate {
     private CandidateSituation candidateSituation;// situacao do candidato no turno (2 ou 3 - eleito) (-1 - nao processar)
     private Gender gender; // genero (2 - masculino, 4 - feminino)
     private int candidateVotes; // votos
+    private int candidateAge; // idade
 
     
     public Candidate(String[] values) {
@@ -112,6 +115,10 @@ public class Candidate {
         candidateVotes += votes;
     }
 
+    public void setCandidateAge(int age) {
+        candidateAge = age;
+    }
+
     @Override
     public String toString() {
         return "\n+----------------------------------------+\n" +
@@ -128,9 +135,5 @@ public class Candidate {
                "| Votos: " + candidateVotes + "\n" +
                "+----------------------------------------+\n";
 
-    }
-
-    public void printCandidate() {
-        System.out.println(this.candidateName + " (" + this.partyAcronym + ", " + this.candidateVotes + " votos)");
     }
 }
