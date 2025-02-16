@@ -1,9 +1,12 @@
 import java.io.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class ElectionFileReader implements CSVFileReader {
     private String[] keys;
     private List<String[]> values = new ArrayList<>();
+    private LocalDate electionDate;
 
     @Override
     public void validateFilePath(String filePath) throws IOException {
@@ -51,14 +54,15 @@ public class ElectionFileReader implements CSVFileReader {
 
                 // select the following columns: CD_CARGO, CD_MUNICIPIO, NR_VOTAVEL, QT_VOTOS
                 String[] selectedValues = {
-                    row[17], row[13], row[19], row[21]
+                        row[17], row[13], row[19], row[21]
                 };
 
                 // only add the councilors that are in the actual city
+                int candidateNumber = Integer.parseInt(selectedValues[2]);
                 if (selectedValues[0].equals("13") && selectedValues[1].equals(String.valueOf(cityCode))) {
-                    if (selectedValues[2].length() == 5) {
+                    if (candidateNumber != 95 && candidateNumber != 96 && candidateNumber != 97 && candidateNumber != 98) { // null or blank votes
                         values.add(selectedValues);
-                        // System.out.println("CODIGO DO MUNICIPIO: " + selectedValues[1]);
+                    // System.out.println("CODIGO DO MUNICIPIO: " + selectedValues[1]);
                     }
                     // System.out.println("Values: " + Arrays.toString(selectedValues));
                 }
@@ -79,6 +83,8 @@ public class ElectionFileReader implements CSVFileReader {
         try {
             File file = new File(filePath);
 
+            this.electionDate = getElectionDate(file);
+
             this.keys = readKeysCSV(file);
 
             this.values = readValuesCSV(file, cityCode);
@@ -87,13 +93,53 @@ public class ElectionFileReader implements CSVFileReader {
         }
     }
 
-    public void ComputeVotes(HashMap<Integer, Candidate> candidates) {
+    public void ComputeVotes(HashMap<Integer, Candidate> candidates,
+            HashMap<Integer, PoliticalParty> politicalParties) {
 
-        for (String[] value : values) {
+        for (String[] value : values) { 
             int candidateNumber = Integer.parseInt(value[2]);
             int newVotes = Integer.parseInt(value[3]);
 
-            candidates.get(candidateNumber).incCandidateVotes(newVotes);
+            if (value[2].length() == 5) { // nominal vote
+
+                Candidate actualCandidate = candidates.get(candidateNumber);
+
+                actualCandidate.incCandidateVotes(newVotes);
+
+                PoliticalParty actualParty = politicalParties.get(actualCandidate.getPartyNumber());
+                actualParty.addNominalVotes(newVotes);
+            } else {
+                System.out.println("voto de legenda: " + candidateNumber);
+                PoliticalParty actualParty = politicalParties.get(candidateNumber);
+                actualParty.addLegendVotes(newVotes);
+
+            }
+
+        }
+    }
+
+    public static LocalDate getElectionDate(File file) throws IOException {
+        try {
+            Scanner scanner = new Scanner(file, "ISO-8859-1");
+
+            // discards first line of csv
+            if (scanner.hasNextLine())
+                scanner.nextLine();
+
+            String[] row = scanner.nextLine().split(";");
+
+            // select the election date
+            String dateStr = row[0].replaceAll("^\"|\"$", "");
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+            scanner.close();
+
+            return LocalDate.parse(dateStr, formatter);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -105,5 +151,9 @@ public class ElectionFileReader implements CSVFileReader {
     @Override
     public List<String[]> getValues() {
         return new ArrayList<String[]>(this.values);
+    }
+
+    public LocalDate getElectionDate() {
+        return this.electionDate;
     }
 }

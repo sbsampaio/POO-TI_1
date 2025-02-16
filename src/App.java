@@ -1,4 +1,5 @@
 import java.io.PrintStream;
+import java.time.LocalDate;
 import java.util.Locale;
 
 public class App {
@@ -7,6 +8,6 @@ public class App {
 
         CandidateFileReader file = new CandidateFileReader("/home/lhrscopel/Documentos/poo/POO-TI_1/csv/consulta_cand_2024_ES.csv", 57053);
         ElectionFileReader file2 = new ElectionFileReader("/home/lhrscopel/Documentos/poo/POO-TI_1/csv/votacao_secao_2024_ES.csv", 57053);
-        ElectionReport report = new ElectionReport(file, file2);
+        ElectionReport report = new ElectionReport(file, file2, "/home/lhrscopel/Documentos/poo/POO-TI_1/csv/consulta_cand_2024_ES.csv");
     }
 }

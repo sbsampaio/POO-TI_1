@@ -1,22 +1,22 @@
 import java.io.*;
 import java.util.*;
 
-enum KEYS_NAME {
-    SG_UE, // codigo do municipio
-    CD_CARGO, // codigo do cargo
-    NR_CANDIDATO, // numero do candidato
-    NM_URNA_CANDIDATO, // nome do candidato
-    NR_PARTIDO, // numero do partido
-    SG_PARTIDO, // sigla do partido
-    NR_FEDERACAO, // numero da federacao (-1 para partido isolado)
-    DT_NASCIMENTO, // data de nascimento
-    CD_SIT_TOT_TURNO, // situacao do candidato no turno (2 ou 3 - eleito) (-1 - nao processar)
-    CD_GENERO; // genero (2 - masculino, 4 - feminino)
+// enum KEYS_NAME {
+//     SG_UE,
+//     CD_CARGO,
+//     NR_CANDIDATO,
+//     NM_URNA_CANDIDATO,
+//     NR_PARTIDO,
+//     SG_PARTIDO,
+//     NR_FEDERACAO,
+//     DT_NASCIMENTO,
+//     CD_SIT_TOT_TURNO,
+//     CD_GENERO;
 
-    public int idx() {
-        return this.ordinal();
-    }
-}
+//     public int idx() {
+//         return this.ordinal();
+//     }
+// }
 
 public class CandidateFileReader implements CSVFileReader {
     private String[] keys;
@@ -86,10 +86,6 @@ public class CandidateFileReader implements CSVFileReader {
                 if (selectedValues[1].equals("13")) {
                     if (Integer.parseInt(selectedValues[0]) == cityCode){
                         values.add(selectedValues);
-
-                //     if (selectedValues[2].length() == 5) {
-                //         values.add(selectedValues);
-                //         // System.out.println("CODIGO DO MUNICIPIO: " + selectedValues[0]);
                     }
                 }
             }

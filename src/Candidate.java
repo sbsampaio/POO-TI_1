@@ -1,7 +1,8 @@
 import java.io.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.text.NumberFormat;
-import java.util.Locale;
 
 enum Gender {
     MASCULINE,
@@ -22,13 +23,13 @@ public class Candidate {
     private int partyNumber; // numero do partido
     private String partyAcronym; // sigla do partido
     private int federationNumber; // numero da federacao (-1 para partido isolado)
-    private String birthDate; // data de nascimento
-    private CandidateSituation candidateSituation;// situacao do candidato no turno (2 ou 3 - eleito) (-1 - nao processar)
+    private LocalDate birthDate; // data de nascimento
+    private CandidateSituation candidateSituation;// situacao do candidato no turno (2 ou 3 - eleito) (-1 - nao
+                                                  // processar)
     private Gender gender; // genero (2 - masculino, 4 - feminino)
     private int candidateVotes; // votos
-    private int candidateAge; // idade
+    private long candidateAge; // idade
 
-    
     public Candidate(String[] values) {
         this.cityCode = Integer.parseInt(values[0]);
         this.jobCode = Integer.parseInt(values[1]);
@@ -37,11 +38,16 @@ public class Candidate {
         this.partyNumber = Integer.parseInt(values[4]);
         this.partyAcronym = values[5];
         this.federationNumber = Integer.parseInt(values[6]);
-        this.birthDate = values[7];
+
+        String dateStr = values[7]; // Data da eleição no formato "dd/MM/yyyy"
+
+        // Converte a string para LocalDate
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        this.birthDate = LocalDate.parse(dateStr, formatter);
+
         if (values[8].equals("2") || values[8].equals("3")) {
             this.candidateSituation = CandidateSituation.ELECTED;
-        } 
-        else if (values[8].equals("-1")) {
+        } else if (values[8].equals("-1")) {
             this.candidateSituation = CandidateSituation.INVALID;
         } else {
             this.candidateSituation = CandidateSituation.NOT_ELECTED;
@@ -54,12 +60,18 @@ public class Candidate {
         }
     }
 
-    public static HashMap<Integer, Candidate> CreateCandidates(List<String[]> values) {
+    public static HashMap<Integer, Candidate> CreateCandidates(List<String[]> values, HashMap<Integer, PoliticalParty> politicalParties) {
+        // quando criar um candidato, adicionar ao partido ao qual ele pertence
+        // retornar o partido correspondente a chave dele, e nesse adicionar na 
+        // lista de candidatos, o candidato
         HashMap<Integer, Candidate> candidates = new HashMap<Integer, Candidate>();
 
         for (String[] value : values) {
             Candidate candidate = new Candidate(value);
             candidates.put(candidate.candidateNumber, candidate);
+
+            PoliticalParty candidateParty = politicalParties.get(candidate.partyNumber);
+            candidateParty.addCandidate(candidate);
         }
 
         return new HashMap<>(candidates);
@@ -94,7 +106,7 @@ public class Candidate {
         return federationNumber;
     }
 
-    public String getBirthDate() {
+    public LocalDate getBirthDate() {
         return birthDate;
     }
 
@@ -115,25 +127,29 @@ public class Candidate {
         candidateVotes += votes;
     }
 
-    public void setCandidateAge(int age) {
-        candidateAge = age;
+    public void setCandidateAge(LocalDate electionDate) {
+        candidateAge = ChronoUnit.YEARS.between(birthDate, electionDate);
+    }
+
+    public long getCandidateAge() {
+        return candidateAge;
     }
 
     @Override
     public String toString() {
         return "\n+----------------------------------------+\n" +
-               "| Codigo do municipio: " + cityCode + "\n" +
-               "| Codigo do cargo: " + jobCode + "\n" +
-               "| Numero do candidato: " + candidateNumber + "\n" +
-               "| Nome do candidato: " + candidateName + "\n" +
-               "| Numero do partido: " + partyNumber + "\n" +
-               "| Sigla do partido: " + partyAcronym + "\n" +
-               "| Numero da federacao: " + federationNumber + "\n" +
-               "| Data de nascimento: " + birthDate + "\n" +
-               "| Situacao do candidato: " + candidateSituation + "\n" +
-               "| Genero: " + gender + "\n" +
-               "| Votos: " + candidateVotes + "\n" +
-               "+----------------------------------------+\n";
+                "| Codigo do municipio: " + cityCode + "\n" +
+                "| Codigo do cargo: " + jobCode + "\n" +
+                "| Numero do candidato: " + candidateNumber + "\n" +
+                "| Nome do candidato: " + candidateName + "\n" +
+                "| Numero do partido: " + partyNumber + "\n" +
+                "| Sigla do partido: " + partyAcronym + "\n" +
+                "| Numero da federacao: " + federationNumber + "\n" +
+                "| Data de nascimento: " + birthDate + "\n" +
+                "| Situacao do candidato: " + candidateSituation + "\n" +
+                "| Genero: " + gender + "\n" +
+                "| Votos: " + candidateVotes + "\n" +
+                "+----------------------------------------+\n";
 
     }
 }
