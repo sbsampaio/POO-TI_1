@@ -109,7 +109,6 @@ public class ElectionFileReader implements CSVFileReader {
                 PoliticalParty actualParty = politicalParties.get(actualCandidate.getPartyNumber());
                 actualParty.addNominalVotes(newVotes);
             } else {
-                System.out.println("voto de legenda: " + candidateNumber);
                 PoliticalParty actualParty = politicalParties.get(candidateNumber);
                 actualParty.addLegendVotes(newVotes);
 

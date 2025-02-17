@@ -29,14 +29,20 @@ public class ElectionReport {
             printMajorityElectedCandidates();
             printElectedWithProportionalBenefit();
             printPoliticalPartyData();
+            printfMostAndLeastPartyCandidates();
             printElectedByAge(electionDate);
             printElectedByGender();
+            printVoteData();
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    /*
+     * 1-
+     * print the quantity of elected candidates
+     */
     public void printQuantityElected() {
         System.out.println("Número de vagas: " + getQuantityElected());
     }
@@ -77,6 +83,7 @@ public class ElectionReport {
     }
 
     /*
+     * 2-
      * print the elected candidates
      */
     public void printElectedCandidates() {
@@ -102,6 +109,7 @@ public class ElectionReport {
     }
 
     /*
+     * 3-
      * print the most voted candidates
      */
     public void printMostVotedCandidates() {
@@ -114,6 +122,7 @@ public class ElectionReport {
     }
 
     /*
+     * 4-
      * print the candidates that would have been elected if the majority criterion
      * had been used, but weren't
      */
@@ -132,6 +141,7 @@ public class ElectionReport {
     }
 
     /*
+     * 5-
      * print the candidates that were elected with benefited from the proportional
      * system, but
      * wouldn't have been elected if the majority criterion had been used
@@ -151,6 +161,7 @@ public class ElectionReport {
     }
 
     /*
+     * 6-
      * print all the political partys ordered by votes (decrescent)
      * shows the amount of nominal and legend votes, and the amount of
      * elected candidates
@@ -158,45 +169,74 @@ public class ElectionReport {
     public void printPoliticalPartyData() {
         System.out.println("\nVotação dos partidos e número de candidatos eleitos:");
 
+
+        for (PoliticalParty party : politicalParties.values()) {
+            party.computeElectedCandidates();
+        }
+
         List<PoliticalParty> politicalPartiesList = new ArrayList<>(politicalParties.values());
+
+        
 
         politicalPartiesList.sort(Comparator
                 .comparing(PoliticalParty::getTotalVotes, Comparator.reverseOrder())
                 .thenComparing(PoliticalParty::getNumber));
 
+        NumberFormat brFormat = NumberFormat.getInstance(Locale.forLanguageTag("pt-BR"));
+
         int counter = 0;
         for (PoliticalParty party : politicalPartiesList) {
             counter++;
             System.out.println(counter + " - " + party.getPartyAcronym() + " - " + party.getNumber() +
-                    ", " + party.getTotalVotes() + " votos (" + party.getNominalVotes() + " nominais e " +
-                    party.getLegendVotes() + " de legenda), " + party.getElectedCandidates() + " candidatos eleitos");
+                    ", " + brFormat.format(party.getTotalVotes()) + " votos (" + brFormat.format(party.getNominalVotes()) + " nominais e " +
+                    brFormat.format(party.getLegendVotes()) + " de legenda), " + party.getElectedCandidates() + " candidatos eleitos");
         }
     }
 
-    public void printElectedByGender() {
-        System.out.println("\nEleitos, por gênero:");
+    /*
+     * 7-
+     * print most and least voted candidates of each political party
+     */
+    public void printfMostAndLeastPartyCandidates() {
+        System.out.println("\nPrimeiro e último colocados de cada partido:");
 
-        List<Candidate> electedCandidates = getElectedCandidates();
-        int feminine = 0, masculine = 0;
+        List<PoliticalParty> politicalPartiesList = new ArrayList<>(politicalParties.values());
 
-        for (Candidate candidate : electedCandidates) {
-            if (candidate.getGender() == Gender.FEMININE) {
-                feminine++;
-            } else {
-                masculine++;
+        politicalPartiesList.sort(Comparator.comparing(
+                party -> party.getCandidates().stream()
+                        .mapToInt(Candidate::getCandidateVotes)
+                        .max()
+                        .orElse(0),
+                Comparator.reverseOrder()));
+
+        NumberFormat brFormat = NumberFormat.getInstance(Locale.forLanguageTag("pt-BR"));
+        
+
+        int counter = 0;
+        for (PoliticalParty party : politicalPartiesList) {
+
+            if (party.getTotalVotes() > 0) {
+                party.getCandidates().sort(Comparator
+                        .comparing(Candidate::getCandidateVotes, Comparator.reverseOrder())
+                        .thenComparing(Candidate::getCandidateAge));
+
+                Candidate mostVoted = party.getMostVotedCandidate();
+                Candidate leastVoted = party.getLeastVotedCandidate();
+
+                counter++;
+                System.out.println(counter + " - " + party.getPartyAcronym() + " - " + party.getNumber() + ", " +
+                        mostVoted.getCandidateName() + " (" + mostVoted.getCandidateNumber() + ", "
+                        + brFormat.format(mostVoted.getCandidateVotes()) + " votos) / " +
+                        leastVoted.getCandidateName() + " (" + leastVoted.getCandidateNumber() + ", "
+                        + brFormat.format(leastVoted.getCandidateVotes()) + " votos)");
             }
         }
-
-        DecimalFormat df = new DecimalFormat();
-        df.setMaximumFractionDigits(2);
-
-        System.out.println(
-                "Feminino: " + feminine + " (" + df.format((float) feminine / getQuantityElected() * 100) + "%)");
-        System.out.println(
-                "Masculino: " + masculine + " (" + df.format((float) masculine / getQuantityElected() * 100) + "%)");
-
     }
 
+    /*
+     * 8-
+     * print the data about the age range of the elected candidates
+     */
     public void printElectedByAge(LocalDate electionDate) {
         System.out.println("\nEleitos, por faixa etária (na data da eleição):");
 
@@ -233,6 +273,54 @@ public class ElectionReport {
         System.out.println(
                 "60 <= Idade : " + faixa5 + " (" + df.format((float) faixa5 / getQuantityElected() * 100) + "%)");
 
+    }
+
+    /*
+     * 9-
+     * stats of the gender distribuition of the elected candidates
+     */
+    public void printElectedByGender() {
+        System.out.println("\nEleitos, por gênero:");
+
+        List<Candidate> electedCandidates = getElectedCandidates();
+        int feminine = 0, masculine = 0;
+
+        for (Candidate candidate : electedCandidates) {
+            if (candidate.getGender() == Gender.FEMININE) {
+                feminine++;
+            } else {
+                masculine++;
+            }
+        }
+
+        DecimalFormat df = new DecimalFormat();
+        df.setMaximumFractionDigits(2);
+
+        System.out.println(
+                "Feminino: " + feminine + " (" + df.format((float) feminine / getQuantityElected() * 100) + "%)");
+        System.out.println(
+                "Masculino: " + masculine + " (" + df.format((float) masculine / getQuantityElected() * 100) + "%)");
+
+    }
+
+    public void printVoteData() {
+
+        int totalVotes = 0, nominalVotes = 0, captionVotes = 0;
+
+        for (PoliticalParty party : politicalParties.values()) {
+            nominalVotes += party.getNominalVotes();
+            captionVotes += party.getLegendVotes();
+            totalVotes += party.getTotalVotes();
+        }
+
+        NumberFormat brFormat = NumberFormat.getInstance(Locale.forLanguageTag("pt-BR"));
+        DecimalFormat df = new DecimalFormat();
+        df.setMaximumFractionDigits(2);
+
+        System.out.println("\nTotal de votos válidos: " + brFormat.format(totalVotes));
+        System.out.println("Total de votos nominais: " + brFormat.format(nominalVotes) + " (" + df.format((float)nominalVotes / totalVotes * 100) + "%)");
+        System.out
+                .println("Total de votos de legenda: " + brFormat.format(captionVotes) + " (" + df.format((float)captionVotes / totalVotes * 100) + "%)");
     }
 
     /*

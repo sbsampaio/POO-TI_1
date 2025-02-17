@@ -62,8 +62,26 @@ public class PoliticalParty {
         candidates.add(candidate);
     }
 
-    public void incrementElectedCandidates() {
-        electedCandidates++;
+    // public void incrementElectedCandidates() {
+    //     electedCandidates++;
+    // }
+
+    public Candidate getMostVotedCandidate() {
+        return candidates.get(0);
+    }
+
+    public Candidate getLeastVotedCandidate() {
+        return candidates.get(candidates.size() - 1);
+    }
+
+    public void computeElectedCandidates() {
+        for (Candidate candidate : candidates)
+        {
+            if (candidate.getCandidateSituation() == CandidateSituation.ELECTED)
+            {
+                electedCandidates++;
+            }
+        }
     }
 
     public static HashMap<Integer, PoliticalParty> readPoliticalParties(String filePath) {
