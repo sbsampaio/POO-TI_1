@@ -1,23 +1,6 @@
 import java.io.*;
 import java.util.*;
 
-// enum KEYS_NAME {
-//     SG_UE,
-//     CD_CARGO,
-//     NR_CANDIDATO,
-//     NM_URNA_CANDIDATO,
-//     NR_PARTIDO,
-//     SG_PARTIDO,
-//     NR_FEDERACAO,
-//     DT_NASCIMENTO,
-//     CD_SIT_TOT_TURNO,
-//     CD_GENERO;
-
-//     public int idx() {
-//         return this.ordinal();
-//     }
-// }
-
 public class CandidateFileReader implements CSVFileReader {
     private String[] keys;
     private List<String[]> values = new ArrayList<>();
@@ -63,7 +46,7 @@ public class CandidateFileReader implements CSVFileReader {
         try {
             Scanner scanner = new Scanner(file, "ISO-8859-1");
 
-            // discards first line of csv
+            // discards first line of csv (the keys)
             if (scanner.hasNextLine())
                 scanner.nextLine();
 
@@ -95,7 +78,6 @@ public class CandidateFileReader implements CSVFileReader {
             e.printStackTrace();
         }
 
-        // System.out.println("Candidate file itens: " + values.size());
         return values;
     }
 

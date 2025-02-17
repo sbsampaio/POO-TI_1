@@ -1,4 +1,3 @@
-import java.io.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -16,19 +15,18 @@ enum CandidateSituation {
 }
 
 public class Candidate {
-    private int cityCode; // codigo do municipio
-    private int jobCode; // codigo do cargo
-    private int candidateNumber; // numero do candidato
-    private String candidateName; // nome do candidato
-    private int partyNumber; // numero do partido
-    private String partyAcronym; // sigla do partido
-    private int federationNumber; // numero da federacao (-1 para partido isolado)
-    private LocalDate birthDate; // data de nascimento
-    private CandidateSituation candidateSituation;// situacao do candidato no turno (2 ou 3 - eleito) (-1 - nao
-                                                  // processar)
-    private Gender gender; // genero (2 - masculino, 4 - feminino)
-    private int candidateVotes; // votos
-    private long candidateAge; // idade
+    private int cityCode;
+    private int jobCode;
+    private int candidateNumber;
+    private String candidateName;
+    private int partyNumber;
+    private String partyAcronym;
+    private int federationNumber;
+    private LocalDate birthDate;
+    private CandidateSituation candidateSituation;
+    private Gender gender;
+    private int candidateVotes;
+    private long candidateAge;
 
     public Candidate(String[] values) {
         this.cityCode = Integer.parseInt(values[0]);
@@ -39,9 +37,9 @@ public class Candidate {
         this.partyAcronym = values[5];
         this.federationNumber = Integer.parseInt(values[6]);
 
-        String dateStr = values[7]; // Data da eleição no formato "dd/MM/yyyy"
+        String dateStr = values[7];
 
-        // Converte a string para LocalDate
+        // convert string to LocalDate
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         this.birthDate = LocalDate.parse(dateStr, formatter);
 
@@ -60,10 +58,10 @@ public class Candidate {
         }
     }
 
+    /* 
+     * create candidates and save them in each political party
+     */
     public static HashMap<Integer, Candidate> CreateCandidates(List<String[]> values, HashMap<Integer, PoliticalParty> politicalParties) {
-        // quando criar um candidato, adicionar ao partido ao qual ele pertence
-        // retornar o partido correspondente a chave dele, e nesse adicionar na 
-        // lista de candidatos, o candidato
         HashMap<Integer, Candidate> candidates = new HashMap<Integer, Candidate>();
 
         for (String[] value : values) {
@@ -133,23 +131,5 @@ public class Candidate {
 
     public long getCandidateAge() {
         return candidateAge;
-    }
-
-    @Override
-    public String toString() {
-        return "\n+----------------------------------------+\n" +
-                "| Codigo do municipio: " + cityCode + "\n" +
-                "| Codigo do cargo: " + jobCode + "\n" +
-                "| Numero do candidato: " + candidateNumber + "\n" +
-                "| Nome do candidato: " + candidateName + "\n" +
-                "| Numero do partido: " + partyNumber + "\n" +
-                "| Sigla do partido: " + partyAcronym + "\n" +
-                "| Numero da federacao: " + federationNumber + "\n" +
-                "| Data de nascimento: " + birthDate + "\n" +
-                "| Situacao do candidato: " + candidateSituation + "\n" +
-                "| Genero: " + gender + "\n" +
-                "| Votos: " + candidateVotes + "\n" +
-                "+----------------------------------------+\n";
-
     }
 }

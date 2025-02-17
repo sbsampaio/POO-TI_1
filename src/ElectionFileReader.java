@@ -1,12 +1,9 @@
 import java.io.*;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class ElectionFileReader implements CSVFileReader {
     private String[] keys;
     private List<String[]> values = new ArrayList<>();
-    private LocalDate electionDate;
 
     @Override
     public void validateFilePath(String filePath) throws IOException {
@@ -45,7 +42,7 @@ public class ElectionFileReader implements CSVFileReader {
         try {
             Scanner scanner = new Scanner(file, "ISO-8859-1");
 
-            // discards first line of csv
+            // discards first line of csv (keys)
             if (scanner.hasNextLine())
                 scanner.nextLine();
 
@@ -62,11 +59,8 @@ public class ElectionFileReader implements CSVFileReader {
                 if (selectedValues[0].equals("13") && selectedValues[1].equals(String.valueOf(cityCode))) {
                     if (candidateNumber != 95 && candidateNumber != 96 && candidateNumber != 97 && candidateNumber != 98) { // null or blank votes
                         values.add(selectedValues);
-                    // System.out.println("CODIGO DO MUNICIPIO: " + selectedValues[1]);
                     }
-                    // System.out.println("Values: " + Arrays.toString(selectedValues));
                 }
-
             }
 
             scanner.close();
@@ -82,8 +76,6 @@ public class ElectionFileReader implements CSVFileReader {
 
         try {
             File file = new File(filePath);
-
-            this.electionDate = getElectionDate(file);
 
             this.keys = readKeysCSV(file);
 
@@ -108,37 +100,10 @@ public class ElectionFileReader implements CSVFileReader {
 
                 PoliticalParty actualParty = politicalParties.get(actualCandidate.getPartyNumber());
                 actualParty.addNominalVotes(newVotes);
-            } else {
+            } else { // caption vote
                 PoliticalParty actualParty = politicalParties.get(candidateNumber);
-                actualParty.addLegendVotes(newVotes);
-
+                actualParty.addCaptionVotes(newVotes);
             }
-
-        }
-    }
-
-    public static LocalDate getElectionDate(File file) throws IOException {
-        try {
-            Scanner scanner = new Scanner(file, "ISO-8859-1");
-
-            // discards first line of csv
-            if (scanner.hasNextLine())
-                scanner.nextLine();
-
-            String[] row = scanner.nextLine().split(";");
-
-            // select the election date
-            String dateStr = row[0].replaceAll("^\"|\"$", "");
-
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-            scanner.close();
-
-            return LocalDate.parse(dateStr, formatter);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
         }
     }
 
@@ -150,9 +115,5 @@ public class ElectionFileReader implements CSVFileReader {
     @Override
     public List<String[]> getValues() {
         return new ArrayList<String[]>(this.values);
-    }
-
-    public LocalDate getElectionDate() {
-        return this.electionDate;
     }
 }

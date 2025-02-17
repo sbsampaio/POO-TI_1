@@ -1,10 +1,7 @@
-import java.io.*;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.*;
-
-// import java.util.HashMap;
 
 public class ElectionReport {
     private CandidateFileReader candidateData;
@@ -13,13 +10,13 @@ public class ElectionReport {
     private HashMap<Integer, PoliticalParty> politicalParties;
     private LocalDate electionDate;
 
-    public ElectionReport(CandidateFileReader candidateData, ElectionFileReader votingData, String candidateDataPath) {
+    public ElectionReport(CandidateFileReader candidateData, ElectionFileReader votingData, String candidateDataPath, LocalDate electionDate) {
         try {
             this.candidateData = candidateData;
             this.votingData = votingData;
             this.politicalParties = PoliticalParty.readPoliticalParties(candidateDataPath);
             this.candidates = Candidate.CreateCandidates(candidateData.getValues(), politicalParties);
-            this.electionDate = votingData.getElectionDate();
+            this.electionDate = electionDate;
 
             votingData.ComputeVotes(this.candidates, this.politicalParties);
 
@@ -40,14 +37,6 @@ public class ElectionReport {
     }
 
     /*
-     * 1-
-     * print the quantity of elected candidates
-     */
-    public void printQuantityElected() {
-        System.out.println("Número de vagas: " + getQuantityElected());
-    }
-
-    /*
      * return the quantity of elected candidates
      */
     public int getQuantityElected() {
@@ -60,6 +49,14 @@ public class ElectionReport {
         }
 
         return quantity;
+    }
+
+    /*
+     * 1-
+     * print the quantity of elected candidates
+     */
+    public void printQuantityElected() {
+        System.out.println("Número de vagas: " + getQuantityElected());
     }
 
     /*
@@ -103,8 +100,7 @@ public class ElectionReport {
         mostVotedCandidates.sort(Comparator
                 .comparing(Candidate::getCandidateVotes, Comparator.reverseOrder()));
 
-        // Retorna apenas os primeiros 'limit' candidatos, garantindo que não ultrapasse
-        // o tamanho da lista
+        // return only the limit, that is the amount of elected candidates
         return mostVotedCandidates.subList(0, Math.min(limit, mostVotedCandidates.size()));
     }
 
@@ -176,8 +172,6 @@ public class ElectionReport {
 
         List<PoliticalParty> politicalPartiesList = new ArrayList<>(politicalParties.values());
 
-        
-
         politicalPartiesList.sort(Comparator
                 .comparing(PoliticalParty::getTotalVotes, Comparator.reverseOrder())
                 .thenComparing(PoliticalParty::getNumber));
@@ -189,7 +183,7 @@ public class ElectionReport {
             counter++;
             System.out.println(counter + " - " + party.getPartyAcronym() + " - " + party.getNumber() +
                     ", " + brFormat.format(party.getTotalVotes()) + " votos (" + brFormat.format(party.getNominalVotes()) + " nominais e " +
-                    brFormat.format(party.getLegendVotes()) + " de legenda), " + party.getElectedCandidates() + " candidatos eleitos");
+                    brFormat.format(party.getCaptionVotes()) + " de legenda), " + party.getElectedCandidates() + " candidatos eleitos");
         }
     }
 
@@ -272,7 +266,6 @@ public class ElectionReport {
                 "50 <= Idade < 60: " + faixa4 + " (" + df.format((float) faixa4 / getQuantityElected() * 100) + "%)");
         System.out.println(
                 "60 <= Idade : " + faixa5 + " (" + df.format((float) faixa5 / getQuantityElected() * 100) + "%)");
-
     }
 
     /*
@@ -303,13 +296,16 @@ public class ElectionReport {
 
     }
 
+    /* 
+     * print totalvotes, nominalvotes and captionvotes
+     */
     public void printVoteData() {
 
         int totalVotes = 0, nominalVotes = 0, captionVotes = 0;
 
         for (PoliticalParty party : politicalParties.values()) {
             nominalVotes += party.getNominalVotes();
-            captionVotes += party.getLegendVotes();
+            captionVotes += party.getCaptionVotes();
             totalVotes += party.getTotalVotes();
         }
 

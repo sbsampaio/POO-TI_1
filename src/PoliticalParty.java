@@ -7,7 +7,7 @@ public class PoliticalParty {
     private int number;
 
     private int nominalVotes;
-    private int legendVotes;
+    private int captionVotes;
     private int electedCandidates;
     private List<Candidate> candidates;
 
@@ -34,8 +34,8 @@ public class PoliticalParty {
         return nominalVotes;
     }
 
-    public int getLegendVotes() {
-        return legendVotes;
+    public int getCaptionVotes() {
+        return captionVotes;
     }
 
     public List<Candidate> getCandidates() {
@@ -47,15 +47,15 @@ public class PoliticalParty {
     }
 
     public int getTotalVotes() {
-        return nominalVotes + legendVotes;
+        return nominalVotes + captionVotes;
     }
 
     public void addNominalVotes(int votes) {
         nominalVotes += votes;
     }
 
-    public void addLegendVotes(int votes) {
-        legendVotes += votes;
+    public void addCaptionVotes(int votes) {
+        captionVotes += votes;
     }
 
     public void addCandidate(Candidate candidate) {

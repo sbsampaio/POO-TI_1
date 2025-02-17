@@ -1,13 +1,29 @@
-import java.io.PrintStream;
 import java.time.LocalDate;
-import java.util.Locale;
+import java.time.format.DateTimeFormatter;
 
 public class App {
     public static void main(String[] args) throws Exception {
-        // System.setOut(new PrintStream(System.out, true, "ISO-8859-1"));
 
-        CandidateFileReader file = new CandidateFileReader("/home/lhrscopel/Documentos/poo/POO-TI_1/csv/consulta_cand_2024_ES.csv", 57053);
-        ElectionFileReader file2 = new ElectionFileReader("/home/lhrscopel/Documentos/poo/POO-TI_1/csv/votacao_secao_2024_ES.csv", 57053);
-        ElectionReport report = new ElectionReport(file, file2, "/home/lhrscopel/Documentos/poo/POO-TI_1/csv/consulta_cand_2024_ES.csv");
+        // /home/lhrscopel/Documentos/poo/POO-TI_1/csv/consulta_cand_2024_ES.csv
+        // /home/lhrscopel/Documentos/poo/POO-TI_1/csv/votacao_secao_2024_ES.csv
+        // nao consegui compilar <3
+
+        int cityCode = Integer.parseInt(args[0]);
+        String candidateFilePath = args[1];
+        String electionFilePath = args[2];
+        String electionDateString = args[3];
+
+        // Exibe os parâmetros recebidos
+        System.out.println("Código do Município: " + cityCode);
+        System.out.println("Arquivo de Candidatos: " + candidateFilePath);
+        System.out.println("Arquivo de Votação: " + electionFilePath);
+        System.out.println("Data da Eleição: " + electionDateString);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate electionDate = LocalDate.parse(electionDateString, formatter);
+
+        CandidateFileReader file = new CandidateFileReader(candidateFilePath, cityCode);
+        ElectionFileReader file2 = new ElectionFileReader(electionFilePath, cityCode);
+        ElectionReport report = new ElectionReport(file, file2, candidateFilePath, electionDate);
     }
 }
