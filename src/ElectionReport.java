@@ -1,4 +1,5 @@
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.*;
@@ -10,7 +11,8 @@ public class ElectionReport {
     private HashMap<Integer, PoliticalParty> politicalParties;
     private LocalDate electionDate;
 
-    public ElectionReport(CandidateFileReader candidateData, ElectionFileReader votingData, String candidateDataPath, LocalDate electionDate) {
+    public ElectionReport(CandidateFileReader candidateData, ElectionFileReader votingData, String candidateDataPath,
+            LocalDate electionDate) {
         try {
             this.candidateData = candidateData;
             this.votingData = votingData;
@@ -20,9 +22,9 @@ public class ElectionReport {
 
             votingData.ComputeVotes(this.candidates, this.politicalParties);
 
-            printQuantityElected();
-            printElectedCandidates();
-            printMostVotedCandidates();
+            printQuantityElected(); // qntd vagas
+            printElectedCandidates(); // candidatos eleitos
+            printMostVotedCandidates(); // candidatos mais votados
             printMajorityElectedCandidates();
             printElectedWithProportionalBenefit();
             printPoliticalPartyData();
@@ -112,6 +114,12 @@ public class ElectionReport {
         System.out
                 .println("\nCandidatos mais votados (em ordem decrescente de votação e respeitando número de vagas):");
 
+        int position = 1;
+        for (Candidate candidate : getMostVotedCandidates(this.candidates.size())) {
+            candidate.setMostVotedPosition(position);
+            position++;
+        }
+
         List<Candidate> mostVotedCandidates = getMostVotedCandidates(getQuantityElected());
 
         printCandidatePartyVotes(mostVotedCandidates);
@@ -124,6 +132,7 @@ public class ElectionReport {
      */
     public void printMajorityElectedCandidates() {
         System.out.println("\nTeriam sido eleitos se a votação fosse majoritária, e não foram eleitos:");
+        System.out.println("(com sua posição no ranking de mais votados)");
 
         List<Candidate> majorityElectedCandidates = getMostVotedCandidates(getQuantityElected());
         List<Candidate> electedCandidates = getElectedCandidates();
@@ -132,8 +141,7 @@ public class ElectionReport {
             majorityElectedCandidates.remove(candidate);
         }
 
-        printCandidatePartyVotes(majorityElectedCandidates);
-
+        printCandidateMostVotedPosition(majorityElectedCandidates);
     }
 
     /*
@@ -153,7 +161,7 @@ public class ElectionReport {
             electedCandidates.remove(candidate);
         }
 
-        printCandidatePartyVotes(electedCandidates);
+        printCandidateMostVotedPosition(electedCandidates);
     }
 
     /*
@@ -164,7 +172,6 @@ public class ElectionReport {
      */
     public void printPoliticalPartyData() {
         System.out.println("\nVotação dos partidos e número de candidatos eleitos:");
-
 
         for (PoliticalParty party : politicalParties.values()) {
             party.computeElectedCandidates();
@@ -182,8 +189,14 @@ public class ElectionReport {
         for (PoliticalParty party : politicalPartiesList) {
             counter++;
             System.out.println(counter + " - " + party.getPartyAcronym() + " - " + party.getNumber() +
-                    ", " + brFormat.format(party.getTotalVotes()) + " votos (" + brFormat.format(party.getNominalVotes()) + " nominais e " +
-                    brFormat.format(party.getCaptionVotes()) + " de legenda), " + party.getElectedCandidates() + " candidatos eleitos");
+                    ", " + brFormat.format(party.getTotalVotes()) + " voto" + (party.getTotalVotes() > 0 ? "s " : " ")
+                    + "("
+                    + brFormat.format(party.getNominalVotes()) + " nomina"
+                    + (party.getNominalVotes() > 0 ? "is " : "l ")
+                    + "e " +
+                    brFormat.format(party.getCaptionVotes()) + " de legenda), " + party.getElectedCandidates()
+                    + " candidato" + (party.getElectedCandidates() > 1 ? "s " : " ") + "eleito"
+                    + (party.getElectedCandidates() > 1 ? "s" : ""));
         }
     }
 
@@ -204,12 +217,13 @@ public class ElectionReport {
                 Comparator.reverseOrder()));
 
         NumberFormat brFormat = NumberFormat.getInstance(Locale.forLanguageTag("pt-BR"));
-        
 
         int counter = 0;
         for (PoliticalParty party : politicalPartiesList) {
 
-            if (party.getTotalVotes() > 0) {
+            // System.out.println(party.getName() + ": " + party.getTotalVotes());
+
+            if (party.getNominalVotes() > 0 && !party.getCandidates().isEmpty()) {
                 party.getCandidates().sort(Comparator
                         .comparing(Candidate::getCandidateVotes, Comparator.reverseOrder())
                         .thenComparing(Candidate::getCandidateAge));
@@ -220,9 +234,11 @@ public class ElectionReport {
                 counter++;
                 System.out.println(counter + " - " + party.getPartyAcronym() + " - " + party.getNumber() + ", " +
                         mostVoted.getCandidateName() + " (" + mostVoted.getCandidateNumber() + ", "
-                        + brFormat.format(mostVoted.getCandidateVotes()) + " votos) / " +
+                        + brFormat.format(mostVoted.getCandidateVotes()) + " voto"
+                        + (mostVoted.getCandidateVotes() > 1 ? "s" : "") + ") / " +
                         leastVoted.getCandidateName() + " (" + leastVoted.getCandidateNumber() + ", "
-                        + brFormat.format(leastVoted.getCandidateVotes()) + " votos)");
+                        + brFormat.format(leastVoted.getCandidateVotes()) + " voto"
+                        + (leastVoted.getCandidateVotes() > 1 ? "s" : "") + ")");
             }
         }
     }
@@ -252,9 +268,13 @@ public class ElectionReport {
             }
         }
 
+        Locale currentLocale = new Locale("pt", "BR");
+        Locale.setDefault(currentLocale);
+        DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(currentLocale);
         DecimalFormat df = new DecimalFormat();
         df.setMaximumFractionDigits(2);
         df.setMinimumFractionDigits(2);
+        df.setDecimalFormatSymbols(otherSymbols);
 
         System.out.println(
                 "Idade < 30: " + faixa1 + " (" + df.format((float) faixa1 / getQuantityElected() * 100) + "%)");
@@ -296,7 +316,7 @@ public class ElectionReport {
 
     }
 
-    /* 
+    /*
      * print totalvotes, nominalvotes and captionvotes
      */
     public void printVoteData() {
@@ -312,11 +332,14 @@ public class ElectionReport {
         NumberFormat brFormat = NumberFormat.getInstance(Locale.forLanguageTag("pt-BR"));
         DecimalFormat df = new DecimalFormat();
         df.setMaximumFractionDigits(2);
+        df.setMinimumFractionDigits(2);
 
         System.out.println("\nTotal de votos válidos: " + brFormat.format(totalVotes));
-        System.out.println("Total de votos nominais: " + brFormat.format(nominalVotes) + " (" + df.format((float)nominalVotes / totalVotes * 100) + "%)");
+        System.out.println("Total de votos nominais: " + brFormat.format(nominalVotes) + " ("
+                + df.format((float) nominalVotes / totalVotes * 100) + "%)");
         System.out
-                .println("Total de votos de legenda: " + brFormat.format(captionVotes) + " (" + df.format((float)captionVotes / totalVotes * 100) + "%)");
+                .println("Total de votos de legenda: " + brFormat.format(captionVotes) + " ("
+                        + df.format((float) captionVotes / totalVotes * 100) + "%)");
     }
 
     /*
@@ -324,11 +347,26 @@ public class ElectionReport {
      */
     public void printCandidatePartyVotes(List<Candidate> candidates) {
         int counter = 0;
+
         for (Candidate candidate : candidates) {
             NumberFormat brFormat = NumberFormat.getInstance(Locale.forLanguageTag("pt-BR"));
 
             counter++;
             System.out.print(counter + " - ");
+            // if the candidate is part of a federation, print an asterisk
+            if (candidate.getFederationNumber() != -1) {
+                System.out.print("*");
+            }
+            System.out.println(candidate.getCandidateName() + " (" + candidate.getPartyAcronym() + ", "
+                    + brFormat.format(candidate.getCandidateVotes()) + " votos)");
+        }
+    }
+
+    public void printCandidateMostVotedPosition(List<Candidate> candidates) {
+        for (Candidate candidate : candidates) {
+            NumberFormat brFormat = NumberFormat.getInstance(Locale.forLanguageTag("pt-BR"));
+
+            System.out.print(candidate.getMostVotedPosition() + " - ");
             // if the candidate is part of a federation, print an asterisk
             if (candidate.getFederationNumber() != -1) {
                 System.out.print("*");

@@ -28,6 +28,8 @@ public class Candidate {
     private int candidateVotes;
     private long candidateAge;
 
+    private int mostVotedPosition;
+
     public Candidate(String[] values) {
         this.cityCode = Integer.parseInt(values[0]);
         this.jobCode = Integer.parseInt(values[1]);
@@ -58,10 +60,11 @@ public class Candidate {
         }
     }
 
-    /* 
+    /*
      * create candidates and save them in each political party
      */
-    public static HashMap<Integer, Candidate> CreateCandidates(List<String[]> values, HashMap<Integer, PoliticalParty> politicalParties) {
+    public static HashMap<Integer, Candidate> CreateCandidates(List<String[]> values,
+            HashMap<Integer, PoliticalParty> politicalParties) {
         HashMap<Integer, Candidate> candidates = new HashMap<Integer, Candidate>();
 
         for (String[] value : values) {
@@ -131,5 +134,13 @@ public class Candidate {
 
     public long getCandidateAge() {
         return candidateAge;
+    }
+
+    public int getMostVotedPosition() {
+        return mostVotedPosition;
+    }
+
+    public void setMostVotedPosition(int mostVotedPosition) {
+        this.mostVotedPosition = mostVotedPosition;
     }
 }

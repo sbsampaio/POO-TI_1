@@ -1,6 +1,8 @@
 import java.io.*;
 import java.util.*;
 
+import javax.lang.model.type.NullType;
+
 public class PoliticalParty {
     private String name;
     private String acronym;
@@ -63,7 +65,7 @@ public class PoliticalParty {
     }
 
     // public void incrementElectedCandidates() {
-    //     electedCandidates++;
+    // electedCandidates++;
     // }
 
     public Candidate getMostVotedCandidate() {
@@ -71,14 +73,23 @@ public class PoliticalParty {
     }
 
     public Candidate getLeastVotedCandidate() {
-        return candidates.get(candidates.size() - 1);
+        int idx = candidates.size() - 1;
+        Candidate c = candidates.get(idx);
+        while (c.getCandidateVotes() == 0 && idx > 0) {
+            idx--;
+            c = candidates.get(idx);
+        }
+        return c;
+        // return candidates.get(candidates.size() - 1);
+    }
+
+    public Candidate getLeastVotedElectedCandidate() {
+        return candidates.get(getElectedCandidates());
     }
 
     public void computeElectedCandidates() {
-        for (Candidate candidate : candidates)
-        {
-            if (candidate.getCandidateSituation() == CandidateSituation.ELECTED)
-            {
+        for (Candidate candidate : candidates) {
+            if (candidate.getCandidateSituation() == CandidateSituation.ELECTED) {
                 electedCandidates++;
             }
         }
